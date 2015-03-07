@@ -2,9 +2,15 @@ import vec2 from "gl-vec2";
 
 
 export default class Stickman {
-    constructor(initialPosition) {
+    constructor(player, initialPosition) {
+        this.player = player;
         this.position = vec2.clone(initialPosition);
         this.velocity = vec2.create();
+    }
+
+    update(dt) {
+        this.position[0] += this.velocity[0] * dt;
+        this.position[1] += this.velocity[1] * dt;
     }
 
     draw(context) {

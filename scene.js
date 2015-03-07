@@ -3,6 +3,7 @@ import mousePosition from "mouse-position";
 
 import Camera from "./camera";
 import Player from "./player";
+import Stickman from "./stickman"
 import World from "./world";
 
 
@@ -17,8 +18,10 @@ export default class Scene {
 
         this.camera = new Camera(this.canvas.width, this.canvas.height);
 
+        this.players = [];
+
         this.entities = {
-            players: [],
+            stickmen: [],
         };
 
         this.world = new World(100, 100);
@@ -110,10 +113,16 @@ export default class Scene {
         this.world.fillArea(21, 22, 14, 1, 1);
 
         // Create main player
-        var player = new Player();
-        this.entities.players.push(player);
+        var player = new Player("John");
+        this.players.push(player);
+        this.spawnPlayer(player, [10, 10]);
+    }
 
-        player.spawn([10, 10]);
+    spawnPlayer(player, initialPosition) {
+        var stickman = new Stickman(player, initialPosition);
+        this.entities.stickmen.push(stickman);
+
+        return stickman;
     }
 
     updateCanvasSize() {
@@ -133,26 +142,27 @@ export default class Scene {
         // Draw world
         this.world.draw(this.context);
 
-        // Draw players
+        // Draw stickmen
         var context = this.context;
-        this.entities.players.forEach((player) => {
-            player.draw(context);
+        this.entities.stickmen.forEach((stickman) => {
+            stickman.update(dt);
+            stickman.draw(context);
 
-            this.camera.setPosition(player.stickman.position[0], player.stickman.position[1])
+            this.camera.setPosition(stickman.position[0], stickman.position[1])
 
-            player.stickman.velocity[0] = 0;
-            player.stickman.velocity[1] = 0;
+            stickman.velocity[0] = 0;
+            stickman.velocity[1] = 0;
             if (this.input.upArrowKey) {
-                player.stickman.velocity[1] -= 4;
+                stickman.velocity[1] -= 4;
             }
             if (this.input.downArrowKey) {
-                player.stickman.velocity[1] += 4;
+                stickman.velocity[1] += 4;
             }
             if (this.input.leftArrowKey) {
-                player.stickman.velocity[0] -= 4;
+                stickman.velocity[0] -= 4;
             }
             if (this.input.rightArrowKey) {
-                player.stickman.velocity[0] += 4;
+                stickman.velocity[0] += 4;
             }
         });
 
@@ -160,7 +170,7 @@ export default class Scene {
     }
 
     start() {
-        this.engine = loop((dt) => this.tick()).start();
+        this.engine = loop((dt) => this.tick(dt / 1000.0)).start();
     }
 
     stop() {
