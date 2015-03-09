@@ -11,7 +11,7 @@ export default class Client {
     constructor(canvas) {
         this.canvas = canvas;
 
-        this.context = canvas.getContext("2d");
+        this.context = canvas.getContext('2d');
         this.updateCanvasSize()
 
         this.mouse = mousePosition(this.canvas);
@@ -109,10 +109,10 @@ export default class Client {
             this.player.input.move += 1;
         }
         if (this.input.upArrowKey) {
-            this.player.jump = true;
+            this.player.input.jump = true;
         }
         if (this.input.downArrowKey) {
-            this.player.duck = true;
+            this.player.input.duck = true;
         }
 
         this.scene.tick(dt);

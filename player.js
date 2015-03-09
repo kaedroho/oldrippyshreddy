@@ -1,9 +1,4 @@
 class BasePlayer {
-
-}
-
-
-export class LocalPlayer extends BasePlayer {
     constructor() {
         this.input = {
             move: 0,
@@ -11,4 +6,14 @@ export class LocalPlayer extends BasePlayer {
             duck: false,
         };
     }
+}
+
+
+export class LocalPlayer extends BasePlayer {
+
+}
+
+
+export class RemotePlayer extends BasePlayer {
+
 }

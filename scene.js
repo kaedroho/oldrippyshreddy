@@ -3,7 +3,7 @@ import World from "./world";
 
 
 export default class Scene {
-    constructor(canvas) {
+    constructor() {
         this.players = [];
 
         this.entities = {
