@@ -16,7 +16,7 @@ export default class World {
         }
     }
 
-    draw(context) {
+    loop(dt, context) {
         for (var i = 0; i < this.sizeX; i++) {
             for (var j = 0; j < this.sizeY; j++) {
                 var value = this.grid.get(i, j);

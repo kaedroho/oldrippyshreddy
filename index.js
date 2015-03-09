@@ -1,4 +1,4 @@
-import Scene from "./scene";
+import Client from "./client";
 
 
 var LoadingScreen = React.createClass({
@@ -33,8 +33,8 @@ export default React.createClass({
             return;
         }
 
-        this.scene = new Scene(document.getElementById('canvas'));
-        this.scene.start();
+        this.client = new Client(document.getElementById('canvas'));
+        this.client.start();
 
         this.setState({isRunning: true});
     },

@@ -16,6 +16,7 @@
     "mouse-position": "^1.0.0",
     "ndarray": "^1.0.16",
     "raf-loop": "^1.0.1",
-    "reactify": "^0.17.1"
+    "reactify": "^0.17.1",
+    "right-now": "^1.0.0"
   }
 }

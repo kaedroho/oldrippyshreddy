@@ -1,23 +1,9 @@
-import loop from "raf-loop";
-import mousePosition from "mouse-position";
-
-import Camera from "./camera";
-import Player from "./player";
 import Stickman from "./stickman"
 import World from "./world";
 
 
 export default class Scene {
     constructor(canvas) {
-        this.canvas = canvas;
-
-        this.context = canvas.getContext("2d");
-        this.updateCanvasSize()
-
-        this.mouse = mousePosition(this.canvas);
-
-        this.camera = new Camera(this.canvas.width, this.canvas.height);
-
         this.players = [];
 
         this.entities = {
@@ -25,71 +11,6 @@ export default class Scene {
         };
 
         this.world = new World(100, 100);
-
-        this.engine = null;
-
-        this.input = {
-            upArrowKey: false,
-            leftArrowKey: false,
-            downArrowKey: false,
-            rightArrowKey: false,
-            wKey: false,
-            aKey: false,
-            sKey: false,
-            dKey: false,
-            qKey: false,
-            eKey: false,
-        };
-
-        var input = this.input;
-
-        document.body.onkeydown = function(event) {
-            if (event.which == 38) {
-                input.upArrowKey = true;
-            } else if (event.which == 37) {
-                input.leftArrowKey = true;
-            } else if (event.which == 40) {
-                input.downArrowKey = true;
-            } else if (event.which == 39) {
-                input.rightArrowKey = true;
-            } else if (event.which == 87) {
-                input.wKey = true;
-            } else if (event.which == 65) {
-                input.aKey = true;
-            } else if (event.which == 83) {
-                input.sKey = true;
-            } else if (event.which == 68) {
-                input.dKey = true;
-            } else if (event.which == 81) {
-                input.qKey = true;
-            } else if (event.which == 69) {
-                input.eKey = true;
-            }
-        };
-
-        document.body.onkeyup = function(event) {
-            if (event.which == 38) {
-                input.upArrowKey = false;
-            } else if (event.which == 37) {
-                input.leftArrowKey = false;
-            } else if (event.which == 40) {
-                input.downArrowKey = false;
-            } else if (event.which == 39) {
-                input.rightArrowKey = false;
-            } else if (event.which == 87) {
-                input.wKey = false;
-            } else if (event.which == 65) {
-                input.aKey = false;
-            } else if (event.which == 83) {
-                input.sKey = false;
-            } else if (event.which == 68) {
-                input.dKey = false;
-            } else if (event.which == 81) {
-                input.qKey = false;
-            } else if (event.which == 69) {
-                input.eKey = false;
-            }
-        };
 
         // SETUP GAME
 
@@ -111,11 +32,6 @@ export default class Scene {
 
         // Middle
         this.world.fillArea(21, 22, 14, 1, 1);
-
-        // Create main player
-        var player = new Player("John");
-        this.players.push(player);
-        this.spawnPlayer(player, [10, 10]);
     }
 
     spawnPlayer(player, initialPosition) {
@@ -125,66 +41,20 @@ export default class Scene {
         return stickman;
     }
 
-    updateCanvasSize() {
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
-    }
-
     tick(dt) {
-        this.updateCanvasSize();
-        this.camera.resize(this.canvas.width, this.canvas.height);
-
         // Update stickmen
-        var context = this.context;
         this.entities.stickmen.forEach((stickman) => {
             stickman.tick(dt);
-
-            this.camera.setPosition(stickman.position[0], stickman.position[1])
-
-            stickman.velocity[0] = 0;
-            stickman.velocity[1] = 0;
-            if (this.input.upArrowKey) {
-                stickman.velocity[1] -= 4;
-            }
-            if (this.input.downArrowKey) {
-                stickman.velocity[1] += 4;
-            }
-            if (this.input.leftArrowKey) {
-                stickman.velocity[0] -= 4;
-            }
-            if (this.input.rightArrowKey) {
-                stickman.velocity[0] += 4;
-            }
         });
     }
 
-    draw() {
-        this.context.save();
-
-        // Transform context
-        this.camera.transformContext(this.context);
-
+    loop(dt, context) {
         // Draw world
-        this.world.draw(this.context);
+        this.world.loop(dt, context);
 
         // Draw stickmen
-        var context = this.context;
         this.entities.stickmen.forEach((stickman) => {
-            stickman.draw(context);
+            stickman.loop(dt, context);
         });
-
-        this.context.restore();
-    }
-
-    start() {
-        this.engine = loop((dt) => {
-            this.tick(dt / 1000.0);
-            this.draw();
-        }).start();
-    }
-
-    stop() {
-        this.engine.stop();
-        this.engine = null;
     }
 }
