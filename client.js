@@ -118,7 +118,7 @@ export default class Client {
         this.scene.tick(dt);
     }
 
-    loop(dt) {
+    loop(dt, at) {
         // Update size
         this.updateCanvasSize();
         this.camera.resize(this.canvas.width, this.canvas.height);
@@ -129,20 +129,23 @@ export default class Client {
         // Draw scene
         this.context.save();
         this.camera.transformContext(this.context);
-        this.scene.loop(dt, this.context);
+        this.scene.loop(dt, at, this.context);
         this.context.restore();
     }
 
     start() {
         // Start tick loop
         var tickRate = 30; // Number of ms between ticks
+        var lastTick = now();
         this.tickLoop = setInterval(() => {
             this.tick(tickRate / 1000.0);
+            lastTick = now();
         }, tickRate);
 
         // Start main loop
         this.mainLoop = loop((dt) => {
-            this.loop(dt / 1000.0);
+            var at = now() - lastTick;
+            this.loop(dt / 1000.0, at / 1000.0);
         }).start();
     }
 

@@ -48,13 +48,13 @@ export default class Scene {
         });
     }
 
-    loop(dt, context) {
+    loop(dt, at, context) {
         // Draw world
-        this.world.loop(dt, context);
+        this.world.loop(dt, at, context);
 
         // Draw stickmen
         this.entities.stickmen.forEach((stickman) => {
-            stickman.loop(dt, context);
+            stickman.loop(dt, at, context);
         });
     }
 }

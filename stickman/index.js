@@ -12,6 +12,7 @@ export default class Stickman {
     constructor(player, initialPosition) {
         this.player = player;
         this.position = vec2.clone(initialPosition);
+        this.positionNext = vec2.clone(initialPosition);
         this.velocity = vec2.create();
 
         this.origin = vec2.create();
@@ -56,15 +57,19 @@ export default class Stickman {
     }
 
     tick(dt) {
-    }
-
-    loop(dt, context) {
         // Velocity
         this.velocity[0] = this.player.input.move * 10;
 
         // Position
-        this.position[0] += this.velocity[0] * dt;
-        this.position[1] += this.velocity[1] * dt;
+        this.positionNext[0] += this.velocity[0] * dt;
+        this.positionNext[1] += this.velocity[1] * dt;
+    }
+
+    loop(dt, at, context) {
+        // Interpolate position
+        // FIXME: Don't hardcode tickrate here
+        this.position[0] = this.positionNext[0] - this.velocity[0] * (0.03 - at);
+        this.position[1] = this.positionNext[1] - this.velocity[1] * (0.03 - at);
 
         // LEGS
             // Calculate leg count
@@ -289,13 +294,6 @@ export default class Stickman {
         rightElbowPosition[1] += neckPosition[1];
         headPosition[0] += neckPosition[0];
         headPosition[1] += neckPosition[1];
-
-        // Add all positions to player position
-        //for (var vectorID in this.skeleton) {
-        //    var vector = this.skeleton[vectorID];
-        //    vec2.add(vector, vector, this.origin);
-        //    vec2.add(vector, vector, this.position);
-        //}
     }
 
     draw(context) {
