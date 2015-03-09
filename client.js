@@ -102,16 +102,16 @@ export default class Client {
         this.player.input.move = 0;
         this.player.input.jump = false;
         this.player.input.duck = false;
-        if (this.input.leftArrowKey) {
+        if (this.input.leftArrowKey || this.input.aKey) {
             this.player.input.move -= 1;
         }
-        if (this.input.rightArrowKey) {
+        if (this.input.rightArrowKey || this.input.dKey) {
             this.player.input.move += 1;
         }
-        if (this.input.upArrowKey) {
+        if (this.input.upArrowKey || this.input.wKey) {
             this.player.input.jump = true;
         }
-        if (this.input.downArrowKey) {
+        if (this.input.downArrowKey || this.input.sKey) {
             this.player.input.duck = true;
         }
 
