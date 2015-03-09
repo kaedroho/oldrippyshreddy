@@ -8,7 +8,7 @@ export default class Stickman {
         this.velocity = vec2.create();
     }
 
-    update(dt) {
+    tick(dt) {
         this.position[0] += this.velocity[0] * dt;
         this.position[1] += this.velocity[1] * dt;
     }

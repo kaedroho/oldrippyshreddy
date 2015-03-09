@@ -134,19 +134,10 @@ export default class Scene {
         this.updateCanvasSize();
         this.camera.resize(this.canvas.width, this.canvas.height);
 
-        this.context.save();
-
-        // Transform context
-        this.camera.transformContext(this.context);
-
-        // Draw world
-        this.world.draw(this.context);
-
-        // Draw stickmen
+        // Update stickmen
         var context = this.context;
         this.entities.stickmen.forEach((stickman) => {
-            stickman.update(dt);
-            stickman.draw(context);
+            stickman.tick(dt);
 
             this.camera.setPosition(stickman.position[0], stickman.position[1])
 
@@ -165,12 +156,31 @@ export default class Scene {
                 stickman.velocity[0] += 4;
             }
         });
+    }
+
+    draw() {
+        this.context.save();
+
+        // Transform context
+        this.camera.transformContext(this.context);
+
+        // Draw world
+        this.world.draw(this.context);
+
+        // Draw stickmen
+        var context = this.context;
+        this.entities.stickmen.forEach((stickman) => {
+            stickman.draw(context);
+        });
 
         this.context.restore();
     }
 
     start() {
-        this.engine = loop((dt) => this.tick(dt / 1000.0)).start();
+        this.engine = loop((dt) => {
+            this.tick(dt / 1000.0);
+            this.draw();
+        }).start();
     }
 
     stop() {
