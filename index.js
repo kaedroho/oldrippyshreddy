@@ -3,23 +3,19 @@ import Scene from "./scene";
 
 var LoadingScreen = React.createClass({
     render: function() {
+        var content;
         if (this.props.isLoading) {
-            return (
-                <div id="loading-screen">
-                    <h1>Rippy shreddy</h1>
-                    <p>Loading...</p>
-                </div>
-            );
+            content = <p>Loading...</p>;
         } else {
-            var className = this.props.isHidden ? "hidden" : "";
-
-            return (
-                <div id="loading-screen" className={className}>
-                    <h1>Rippy shreddy</h1>
-                    <a href="#" onClick={this.props.onClickPlay}>Play</a>
-                </div>
-            );
+            content = <a href="#" onClick={this.props.onClickPlay}>Play</a>;
         }
+
+        return (
+            <div id="loading-screen">
+                <h1>Rippy shreddy</h1>
+                {content}
+            </div>
+        );
     }
 });
 
