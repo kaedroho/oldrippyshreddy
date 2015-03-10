@@ -4,6 +4,7 @@ class BasePlayer {
             move: 0,
             jump: false,
             duck: false,
+            target: null,
         };
     }
 }

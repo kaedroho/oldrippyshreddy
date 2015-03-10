@@ -126,6 +126,12 @@ export default class Client {
         // Track player
         this.camera.setPosition(this.stickman.position[0], this.stickman.position[1])
 
+        // Mouse position
+        this.player.input.target = this.camera.canvasToScene([
+            this.mouse.x - this.canvas.width / 2,
+            this.mouse.y - this.canvas.height / 2
+        ]);
+
         // Draw scene
         this.context.save();
         this.camera.transformContext(this.context);
