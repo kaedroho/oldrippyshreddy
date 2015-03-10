@@ -94,8 +94,12 @@ export default class Client {
     }
 
     updateCanvasSize() {
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
+        if (this.canvas.width != this.canvas.offsetWidth) {
+            this.canvas.width = this.canvas.offsetWidth;
+        }
+        if (this.canvas.height != this.canvas.offsetHeight) {
+            this.canvas.height = this.canvas.offsetHeight;
+        }
     }
 
     tick(dt) {
