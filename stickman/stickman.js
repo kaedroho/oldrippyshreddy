@@ -32,8 +32,8 @@ export default class Stickman {
             rightHandPosition: vec2.create(),
         };
 
-        this.leftHandPosition = vec2.create();
-        this.rightHandPosition = vec2.create();
+        this.leftHandPosition = vec2.set(vec2.create(), 20, 40);
+        this.rightHandPosition = vec2.set(vec2.create(), 50, 40);
 
         this.parts = {
             head: new StickmanPart(200, this.skeleton.headPosition, this.skeleton.neckPosition, 30),
@@ -54,11 +54,33 @@ export default class Stickman {
         this.legDirection = 0;
         this.duckTransition = 0;
         this.movePhase = 0;
+        this.isRunning = true;
+        this.neckHeight = 0;
+        this.hipHeight = 0;
+    }
+
+    getLegCount() {
+        var legCount = 0;
+        if (!this.parts.lowerLeftLeg.isFractured) {
+            legCount++;
+        }
+        if (!this.parts.lowerRightLeg.isFractured) {
+            legCount++;
+        }
+        return legCount;
     }
 
     tick(dt) {
         // Velocity
-        this.velocity[0] = this.player.input.move * 10;
+        this.velocity[0] = (450/64.0) * this.player.input.move / (1 + this.duckTransition);
+
+        // Half the velocity if only one leg
+        var legCount = this.getLegCount();
+        if (legCount == 0) {
+             this.velocity[0] = 0
+        } else if (legCount == 1) {
+             this.velocity[0] *= 0.5;
+        }
 
         // Position
         this.positionNext[0] += this.velocity[0] * dt;
@@ -71,23 +93,13 @@ export default class Stickman {
         this.position[0] = this.positionNext[0] - this.velocity[0] * (0.03 - at);
         this.position[1] = this.positionNext[1] - this.velocity[1] * (0.03 - at);
 
-        // LEGS
-            // Calculate leg count
-            var legCount = 0;
-            if (!this.parts.lowerLeftLeg.isFractured) {
-                legCount++;
-            }
-            if (!this.parts.lowerRightLeg.isFractured) {
-                legCount++;
-            }
-
         // DUCKING
             // Find duck speed
             var duckDistanceLeft = Math.abs((this.player.input.duck ? 1 : 0) - this.duckTransition);
             var duckSpeed = duckDistanceLeft * dt * 10;
 
             // Update duck transition
-            if (this.player.input.duck && legCount > 0) {
+            if (this.player.input.duck && this.getLegCount() > 0) {
                 this.duckTransition += duckSpeed;
             } else {
                 this.duckTransition -= duckSpeed;
@@ -95,6 +107,69 @@ export default class Stickman {
 
             // Make sure it stays between 0 and 1
             this.duckTransition = clampNumber(this.duckTransition, 0, 1)
+
+            // Calculate neck/hip height
+            var standNeckHeight = 100;
+            var duckNeckHeight = 75;
+            var standHipHeight = 75;
+            var duckHipHeight = 50;
+            this.neckHeight = standNeckHeight + (duckNeckHeight - standNeckHeight) * this.duckTransition;
+            this.hipHeight = standHipHeight + (duckHipHeight - standHipHeight) * this.duckTransition;
+
+        // MOVING ANIMATION
+            // Add move phase change
+            if (true) { //(this.touching.bottom) {
+                var legSpeed = this.velocity[0] * dt * 2;
+                if (this.player.input.move < 0) {
+                    legSpeed *= -1;
+                }
+                this.movePhase += legSpeed;
+            } else {
+                this.movePhase = Math.PI / 8;
+            }
+
+            // Work out leg direction
+            if (this.velocity[0] > 0) {
+                this.legDirection = 1;
+            } else if (this.velocity[0] < 0) {
+                this.legDirection = -1;
+            } else {
+                this.legDirection = 0;
+            }
+
+        // TARGETING
+            // Update targeting
+            if (this.player.input.target) {
+                // TODO: USE NECK POSITION
+                var positionX = this.position[0], positionY = this.position[1] - this.neckHeight / 64.0 - this.hipHeight / 64.0;
+                var targetX = this.player.input.target[0], targetY = this.player.input.target[1];
+
+                // Get difference between position and target
+                var diffX = targetX - positionX;
+                var diffY = targetY - positionY;
+
+                // Direction
+                this.facingLeft = diffX < 0;
+
+                // Find the distance
+                var distance = Math.sqrt(diffX * diffX + diffY * diffY);
+
+                // Work out the muzzle height
+                var muzzleHeight = 40 / 64.0;
+                //if (this.weapon) {
+                 //   if (this.weapon.weaponType.muzzlePosition) {
+                 //       muzzleHeight -= this.weapon.weaponType.muzzlePosition[1];
+                  //  }
+                //\s}
+
+                // Find the angle (40 is the how low the gun is held below the neck)
+                this.pitch = Math.atan2(diffY, Math.abs(diffX)) - Math.asin(muzzleHeight / distance);
+
+                // Prevent NaN
+                if (!this.pitch) {
+                    this.pitch = 0;
+                }
+            }
 
         // Update
         this.updateSkeleton(dt);
@@ -108,15 +183,7 @@ export default class Stickman {
     }
 
     updateSkeleton(dt) {
-        var standNeckHeight = 100;
-        var duckNeckHeight = 75;
-        var standHipHeight = 75;
-        var duckHipHeight = 50;
         var legHeight = 40;
-
-        // Calculate neck/hip height
-        var neckHeight = standNeckHeight + (duckNeckHeight - standNeckHeight) * this.duckTransition;
-        var hipHeight = standHipHeight + (duckHipHeight - standHipHeight) * this.duckTransition;
 
         // Get skeleton
         var hipPosition = this.skeleton.hipPosition;
@@ -134,11 +201,11 @@ export default class Stickman {
 
         // Hip position
         hipPosition[0] = 0;
-        hipPosition[1] = - hipHeight;
+        hipPosition[1] = - this.hipHeight;
 
         // Neck position
         neckPosition[0] = hipPosition[0];
-        neckPosition[1] = hipPosition[1] - neckHeight;
+        neckPosition[1] = hipPosition[1] - this.neckHeight;
 
         // Add recoil to neck position
         if (this.weapon && this.weapon.recoil) {
@@ -168,23 +235,23 @@ export default class Stickman {
         if (this.legDirection != 0) {
             var hipHeightExtra = 0;
             if (this.isRunning) {
-                hipHeightExtra = hipHeight/ 8;
+                hipHeightExtra = this.hipHeight / 8;
             }
 
             // Work out foot X
-            leftFootPosition[0] = hipPosition[0] + Math.sin(-this.movePhase) * hipHeight / 2;
-            rightFootPosition[0] = hipPosition[0] + Math.sin(-this.movePhase + Math.PI) * hipHeight / 2;
+            leftFootPosition[0] = hipPosition[0] + Math.sin(-this.movePhase) * this.hipHeight / 2;
+            rightFootPosition[0] = hipPosition[0] + Math.sin(-this.movePhase + Math.PI) * this.hipHeight / 2;
 
             // Work out foot position
-            leftFootPosition[1] = hipPosition[1] + hipHeight + Math.cos(-this.movePhase) * hipHeight / 4 - hipHeightExtra;
-            rightFootPosition[1] = hipPosition[1] + hipHeight + Math.cos(-this.movePhase + Math.PI) * hipHeight / 4 - hipHeightExtra;
+            leftFootPosition[1] = hipPosition[1] + this.hipHeight + Math.cos(-this.movePhase) * this.hipHeight / 4 - hipHeightExtra;
+            rightFootPosition[1] = hipPosition[1] + this.hipHeight + Math.cos(-this.movePhase + Math.PI) * this.hipHeight / 4 - hipHeightExtra;
 
             // Make sure feet don't go through the floor
-            if (leftFootPosition[1] > hipPosition[1] + hipHeight) {
-                leftFootPosition[1] = hipPosition[1] + hipHeight;
+            if (leftFootPosition[1] > hipPosition[1] + this.hipHeight) {
+                leftFootPosition[1] = hipPosition[1] + this.hipHeight;
             }
-            if (rightFootPosition[1] > hipPosition[1] + hipHeight) {
-                rightFootPosition[1] = hipPosition[1] + hipHeight
+            if (rightFootPosition[1] > hipPosition[1] + this.hipHeight) {
+                rightFootPosition[1] = hipPosition[1] + this.hipHeight
             }
         }
 
