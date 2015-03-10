@@ -43,9 +43,9 @@ export default class Scene {
 
     tick(dt) {
         // Update stickmen
-        this.entities.stickmen.forEach((stickman) => {
+        for (var stickman of this.entities.stickmen) {
             stickman.tick(dt);
-        });
+        };
     }
 
     loop(dt, at, context) {
@@ -53,8 +53,8 @@ export default class Scene {
         this.world.loop(dt, at, context);
 
         // Draw stickmen
-        this.entities.stickmen.forEach((stickman) => {
+        for (var stickman of this.entities.stickmen) {
             stickman.loop(dt, at, context);
-        });
+        }
     }
 }
