@@ -138,6 +138,7 @@ export default class Client {
 
         // Draw scene
         this.context.save();
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.camera.transformContext(this.context);
         this.scene.loop(dt, at, this.context);
         this.context.restore();
