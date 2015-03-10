@@ -72,4 +72,13 @@ export default class Camera {
 
         context.translate(-this.position[0], -this.position[1]);
     }
+
+    canvasToScene(point) {
+        var scale = this.getScale();
+
+        return [
+            point[0] / scale + this.position[0],
+            point[1] / scale + this.position[1],
+        ];
+    }
 }
